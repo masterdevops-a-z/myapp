@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# But keep these directories
+!webapps/
+
+# Keep the contents inside those directories
+!webapps/**
