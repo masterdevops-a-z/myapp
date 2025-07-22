@@ -1,0 +1,44 @@
+name: Deploy birthday.war to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH private key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 51.21.191.89 >> ~/.ssh/known_hosts
+
+      - name: Upload WAR file to EC2
+        run: |
+          scp -i ~/.ssh/id_rsa webapps/birthday.war ubuntu@51.21.191.89:/tmp/birthday.war
+
+      - name: Deploy WAR on EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@51.21.191.89 << 'EOF'
+            echo "Stopping Tomcat..."
+            /opt/tomcat/bin/shutdown.sh
+            sleep 5
+
+            echo "Remove the existing WAR .."
+            rm -f /opt/tomcat/webapps/birthday.war
+
+            echo "Deploying birthday.war..."
+            mv /tmp/birthday.war /opt/tomcat/webapps/birthday.war
+
+            echo "Starting Tomcat..."
+            /opt/tomcat/bin/startup.sh
+
+            echo "Deployment complete."
+          EOF
