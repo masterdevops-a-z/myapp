@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout source code
@@ -35,7 +35,7 @@ jobs:
             rm -f /opt/tomcat/webapps/birthday.war
 
             echo "Deploying birthday.war..."
-            mv /tmp/birthday.war /opt/tomcat/webapps/birthday.war
+            cp /tmp/birthday.war /opt/tomcat/webapps/birthday.war
 
             echo "Starting Tomcat..."
             /opt/tomcat/bin/startup.sh
